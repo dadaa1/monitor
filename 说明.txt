@@ -1,0 +1,5 @@
+安装node程序
+进入文件夹目录
+执行npm install 
+然后执行npm start 
+同时执行npm run mock_tcp

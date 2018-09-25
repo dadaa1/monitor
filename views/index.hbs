@@ -1,0 +1,211 @@
+<h1>{{title}}</h1>
+<span id="time">
+    <p>9:51:23</p>
+    <p>2018年6月7日</p>
+</span>
+<div id="main" style='width:500px;height:300px;'></div>
+<div id="main3" style='width:500px;height:300px;'></div>
+<div id="main2" style='width:1200px;height:400px;'></div>
+<script src="/socket.io/socket.io.js"></script>
+<script src='/javascripts/echarts.min.js'></script>
+<script>
+    window.onload = function () {
+        let socket =
+            io.connect('http://localhost:3000');
+        socket.on('connect', () => {
+            socket.emit('new data', '快点给我发消息吧~');
+        });
+        socket.on('msg', function (data) {
+            addData(data);
+        });
+        function addData(data) {
+            console.log(data);
+            data = JSON.parse(data);
+            let dianya = [];
+            let dianliu = [];
+            let gonglv = [];
+            for (v in data) {
+                if (typeof data[v] == 'object') {
+                    dianya.push(data[v].V);
+                    dianliu.push({
+                      data:[{value: data[v].I, name: v.toUpperCase()+'点电流'}]  
+                    })
+                    gonglv.push({
+                        value: data[v].P, name: v.toUpperCase()+'点'
+                    })
+                }
+            }
+            console.log(dianya)
+            console.log(dianliu)
+            myChart.setOption({
+                series: [{
+                    data: dianya,
+                }]
+            })
+            myChart2.setOption({
+                series: dianliu,
+            })
+            myChart3.setOption({
+                series: {
+                    type: 'pie',
+                    radius : '65%',
+                    center: ['50%', '50%'],
+                    selectedMode: 'single',
+                    data:gonglv,
+                },
+            })
+        }
+        var myChart = echarts.init(document.getElementById('main')); //电压
+        var myChart2 = echarts.init(document.getElementById('main2')); //电流
+        var myChart3 = echarts.init(document.getElementById('main3')); //电流
+        // 指定图表的配置项和数据
+        var option1 = {
+            title: {
+                text: '不同节点的实时电压',
+                left:'center',
+                textStyle:{
+                    color:'#fff',
+                }
+            },
+            textStyle:{
+               color:['#fff'], 
+            },
+            xAxis: {
+                data: ['A点', 'B点', 'C点', 'D点', 'E点']
+            },
+            yAxis: {},
+            series: [{
+                name: '电压',
+                type: 'line',
+                data: [220, 100, 260, 300, 180]
+            }]
+        };
+        // 使用刚指定的配置项和数据显示图表。
+        var option2={
+            title: {
+                text: '不同节点的实时电流',
+                left:'center',
+                textStyle:{
+                    color:'#fff',
+                }
+            },
+            series: [
+                {
+                    name: '电流量',
+                    center:['10%','50%'],
+                    radius:'50%',
+                    title:{
+                        color:'#fff',
+                    },
+                    type: 'gauge',
+                    detail: {formatter:'{value}'},
+                    emphasis:{
+                        itemStyle:{
+                            color:'#fff',
+                        }
+                    },
+                    data: [{value: 50, name: 'A点电流'}]
+                },
+                {
+                    name: '电流量',
+                    center:['30%','50%'],
+                    title:{
+                        color:'#fff',
+                    },
+                    radius:'50%',
+                    type: 'gauge',
+                    detail: {formatter:'{value}'},
+                    data: [{value: 50, name: 'B点电流'}]
+                },
+                {
+                    name: '电流量',
+                    center:['50%','50%'],
+                    title:{
+                        color:'#fff',
+                    },
+                    radius:'50%',
+                    type: 'gauge',
+                    detail: {formatter:'{value}'},
+                    data: [{value: 50, name: 'C点电流'}]
+                },
+                {
+                    name: '电流量',
+                    center:['70%','50%'],
+                    title:{
+                        color:'#fff',
+                    },
+                    radius:'50%',
+                    type: 'gauge',
+                    detail: {formatter:'{value}'},
+                    data: [{value: 50, name: 'D点电流'}]
+                },
+                {
+                    name: '电流量',
+                    center:['90%','50%'],
+                    title:{
+                        color:'#fff',
+                    },
+                    radius:'50%',
+                    type: 'gauge',
+                    detail: {formatter:'{value}'},
+                    data: [{value: 50, name: 'E点电流'}]
+                }
+            ]  
+        }
+        var option3 = {
+                title: {
+                    text: '瞬时功率',
+                    left:'center',
+                    textStyle:{
+                        color:'#fff',
+                    }
+                },
+                textStyle:{
+                    color:['#fff'], 
+                },
+                tooltip : {
+                    trigger: 'item',
+                    formatter: "{a} <br/>{b} 点: {c} ({d}%)"
+                },
+                legend: {
+                    bottom: 10,
+                    left: 'center',
+                    textStyle:{
+                        color:'#fff',
+                    },
+                    data: ['A点', 'B点','C点','D点','E点']
+                },
+                series : [
+                    {
+                        type: 'pie',
+                        radius : '65%',
+                        center: ['50%', '50%'],
+                        selectedMode: 'single',
+                        data:[
+                            {value:548,name: 'A点'},
+                            {value:535, name: 'B点'},
+                            {value:510, name: 'C点'},
+                            {value:634, name: 'D点'},
+                            {value:735, name: 'E点'}
+                        ],
+                        
+                    }
+                ]
+            };
+        myChart.setOption(option1);
+        myChart2.setOption(option2);
+        myChart3.setOption(option3);
+        let time=document.getElementById('time');
+        setInterval(function(){
+            console.log('1231231')
+            let date='';
+            date+='<p>'+new Date().getHours()+':';
+            date+=new Date().getMinutes()+':';
+            date+=new Date().getSeconds()+'</p><p>';
+            date+=new Date().getFullYear()+'年';
+            date+=(new Date().getMonth()+1)+'月';
+            date+=new Date().getDate()+'日</p>';
+            time.innerHTML=date;
+        },1000)
+    }
+</script>
